@@ -7,9 +7,8 @@ Construída com **Signals** e **componentes standalone** para uma integração s
 
 ## 🎥 Demonstração
 
-Coloque aqui um GIF ou uma imagem do seu calendário em ação:
-
-![Chrono Calendar Demo](URL_DA_SUA_IMAGEM_AQUI)
+Acesse o site para ver as demonstrações:
+https://chronocalendar.netlify.app/
 
 ---
 
