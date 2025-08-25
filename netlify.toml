@@ -5,6 +5,10 @@
   # Pasta onde os arquivos compilados da aplicação de teste são gerados
   publish = "dist/test-app/browser"
 
+# Adicione esta seção para dizer ao plugin do Netlify qual projeto usar
+[build.environment]
+  ANGULAR_PROJECT = "test-app"
+
 # Regra de redirecionamento para que o roteamento do Angular funcione
 [[redirects]]
   from = "/*"
