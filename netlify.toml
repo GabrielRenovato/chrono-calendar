@@ -1,0 +1,12 @@
+[build]
+  # Comando para construir apenas a aplicação de teste
+  command = "ng build test-app --configuration=production"
+
+  # Pasta onde os arquivos compilados da aplicação de teste são gerados
+  publish = "dist/test-app/browser"
+
+# Regra de redirecionamento para que o roteamento do Angular funcione
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
