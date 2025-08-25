@@ -1,0 +1,43 @@
+<div class="calendar-wrapper">
+  <!-- Cabeçalho -->
+  <header class="calendar-header">
+    <div class="header-nav">
+      <h1 class="header-title">{{ tituloDoCabecalho() }}</h1>
+      <div class="nav-buttons">
+        <button class="nav-button" (click)="irParaAnterior()">‹</button>
+        <button class="nav-button" (click)="irParaProximo()">›</button>
+      </div>
+      <button class="today-button" (click)="irParaHoje()">Hoje</button>
+    </div>
+
+    <!-- Seletores de Visualização -->
+    <div class="view-switcher">
+      <button class="view-button" [class.active]="visualizacaoAtual() === 'mensal'"
+        (click)="definirVisualizacao('mensal')">Mês</button>
+      <button class="view-button" [class.active]="visualizacaoAtual() === 'semanal'"
+        (click)="definirVisualizacao('semanal')">Semana</button>
+      <button class="view-button" [class.active]="visualizacaoAtual() === 'diario'"
+        (click)="definirVisualizacao('diario')">Dia</button>
+    </div>
+  </header>
+
+  <!-- Corpo do Calendário -->
+  <div class="calendar-body">
+    @switch (visualizacaoAtual()) {
+    @case ('mensal') {
+    <app-mensal-view [dias]="diasParaExibir()" (diaClicado)="diaClicado.emit($event)"
+      (eventoClicado)="eventoClicado.emit($event)">
+    </app-mensal-view>
+    }
+    @case ('semanal') {
+    <app-semanal-view [dias]="diasParaExibir()" (diaClicado)="diaClicado.emit($event)"
+      (eventoClicado)="eventoClicado.emit($event)">
+    </app-semanal-view>
+    }
+    @case ('diario') {
+    <app-diario-view [dia]="diasParaExibir()[0]" (eventoClicado)="eventoClicado.emit($event)">
+    </app-diario-view>
+    }
+    }
+  </div>
+</div>

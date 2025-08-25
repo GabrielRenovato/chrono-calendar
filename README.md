@@ -1,59 +1,144 @@
-# NgxCalendarWorkspace
+# ⏳ chrono-calendar
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
+[![npm version](https://img.shields.io/npm/v/chrono-calendar.svg)](https://www.npmjs.com/package/chrono-calendar)
+[![downloads](https://img.shields.io/npm/dt/chrono-calendar.svg)](https://www.npmjs.com/package/chrono-calendar)
+[![license](https://img.shields.io/npm/l/chrono-calendar.svg)](https://github.com/seu-usuario/chrono-calendar/blob/main/LICENSE)
 
-## Development server
+Biblioteca Angular para manipulação de calendários, datas e agendamento de eventos com facilidade.
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## 📦 Instalação
 
 ```bash
-ng generate component component-name
+npm install chrono-calendar
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Ou, se estiver usando **yarn**:
 
 ```bash
-ng generate --help
+yarn add chrono-calendar
 ```
 
-## Building
-
-To build the project run:
+Se o pacote for publicado com escopo:
 
 ```bash
-ng build
+npm install @seu-usuario/chrono-calendar
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
+## 🚀 Como Usar
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+```ts
+import { ChronoCalendarModule } from 'chrono-calendar';
+
+@NgModule({
+  imports: [ChronoCalendarModule],
+})
+export class AppModule {}
+```
+
+```ts
+import { ChronoCalendarService } from 'chrono-calendar';
+
+constructor(private chrono: ChronoCalendarService) {}
+
+ngOnInit() {
+  const hoje = this.chrono.getToday();
+  console.log("Data de hoje:", hoje);
+}
+```
+
+---
+
+## 🛠 Publicando no NPM
+
+### 1. Build da biblioteca
 
 ```bash
-ng test
+ng build chrono-calendar
 ```
 
-## Running end-to-end tests
+Após o build, os arquivos estarão na pasta:
 
-For end-to-end (e2e) testing, run:
+```
+dist/chrono-calendar
+```
+
+### 2. Login no npm
 
 ```bash
-ng e2e
+npm login
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### 3. Publicar pacote
 
-## Additional Resources
+```bash
+cd dist/chrono-calendar
+npm publish
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+> ⚠️ **Dica:** Se o nome `chrono-calendar` já existir, altere o `name` no `package.json`:
+
+```json
+{
+  "name": "@seu-usuario/chrono-calendar"
+}
+```
+
+---
+
+## 🔄 Atualizando Versões
+
+1. Alterar versão no `projects/chrono-calendar/package.json`:
+
+```json
+{
+  "version": "0.0.2"
+}
+```
+
+2. Recompilar:
+
+```bash
+ng build chrono-calendar
+```
+
+3. Publicar novamente:
+
+```bash
+cd dist/chrono-calendar
+npm publish
+```
+
+---
+
+## 📚 Documentação
+
+Para mais exemplos e detalhes de configuração, acesse:  
+[https://github.com/seu-usuario/chrono-calendar](https://github.com/seu-usuario/chrono-calendar)
+
+---
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas!  
+Faça um **fork** do repositório, crie sua branch e envie um **Pull Request**.
+
+```bash
+git clone https://github.com/seu-usuario/chrono-calendar.git
+cd chrono-calendar
+npm install
+```
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a licença **MIT**.  
+Veja mais em [LICENSE](./LICENSE).
+
+---
+
+Desenvolvido com ❤️ por [Gabriel Renovato](https://github.com/seu-usuario)

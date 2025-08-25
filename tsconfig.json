@@ -3,12 +3,16 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "chrono-calendar": ["dist/chrono-calendar"]
+    },
     "skipLibCheck": true,
     "isolatedModules": true,
     "esModuleInterop": true,

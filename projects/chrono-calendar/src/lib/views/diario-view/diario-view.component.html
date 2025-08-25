@@ -1,0 +1,25 @@
+@if (dia) {
+<div class="day-view-wrapper">
+    <div class="hour-gutter">
+        @for(hora of horasDoDia; track hora) {
+        <div class="hour-segment">
+            <span class="hour-label">{{ hora }}</span>
+        </div>
+        }
+    </div>
+    <div class="day-container">
+        @for(hora of horasDoDia; track hora) {
+        <div class="hour-line"></div>
+        }
+        @for(evento of dia.eventos; track evento.id) {
+        <div class="event-card" [style.background-color]="evento.cor || '#3b82f6'"
+            [style.top.px]="calcularPosicaoEvento(evento)" [style.height.px]="calcularAlturaEvento(evento)"
+            (click)="eventoClicado.emit(evento)">
+            <p class="event-time">{{ evento.inicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                }} - {{ evento.fim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}</p>
+            <p class="event-title">{{ evento.titulo }}</p>
+        </div>
+        }
+    </div>
+</div>
+}
