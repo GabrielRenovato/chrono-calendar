@@ -8,7 +8,7 @@ import { TooltipComponent } from '../tooltip/tooltip.component';
 @Component({
   selector: 'app-mensal-view',
   standalone: true,
-  imports: [CommonModule, TooltipDirective, TooltipComponent],
+  imports: [CommonModule, TooltipDirective],
   templateUrl: './mensal-view.component.html',
   styleUrl: './mensal-view.component.scss',
 })
