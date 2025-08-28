@@ -1,18 +1,14 @@
 <div class="week-view-wrapper">
-    <!-- Cabeçalho dos Dias (Fixo) -->
     <div class="week-header">
         <div class="hour-gutter-header"></div>
         @for (dia of dias; track dia.data) {
         <div class="day-header" [class.today-header]="dia.eHoje">
-            <p class="weekday-label">{{ diasDaSemana[dia.data.getDay()] }}</p>
-            <p class="day-label" [class.today-number]="dia.eHoje">{{ dia.data.getDate() }}</p>
+            <p class="weekday-label">{{ diasDaSemana[dia.data.weekday % 7] }}</p>
+            <p class="day-label" [class.today-number]="dia.eHoje">{{ dia.data.day }}</p>
         </div>
         }
     </div>
-
-    <!-- Corpo da Agenda (com scroll) -->
     <div class="week-body">
-        <!-- Coluna das Horas -->
         <div class="hour-gutter">
             @for(hora of horasDoDia; track hora) {
             <div class="hour-segment">
@@ -20,23 +16,17 @@
             </div>
             }
         </div>
-
-        <!-- Container dos Dias -->
         <div class="days-container">
             @for (dia of dias; track dia.data) {
             <div class="day-column" [class.today-column]="dia.eHoje" (click)="diaClicado.emit(dia.data)">
-                <!-- Linhas de Hora -->
                 @for(hora of horasDoDia; track hora) {
                 <div class="hour-line"></div>
                 }
-                <!-- Eventos -->
                 @for(evento of dia.eventos; track evento.id) {
-                <div class="event-card" [style.background-color]="evento.cor || '#3b82f6'"
-                    [style.top.px]="calcularPosicaoEvento(evento)" [style.height.px]="calcularAlturaEvento(evento)"
-                    (click)="$event.stopPropagation(); eventoClicado.emit(evento)">
-                    <p class="event-time">{{ evento.inicio.toLocaleTimeString('pt-BR', { hour: '2-digit', minute:
-                        '2-digit' }) }} - {{ evento.fim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit'
-                        }) }}</p>
+                <div class="event-card" [ngStyle]="eventLayouts.get(evento.id)"
+                    [style.background-color]="evento.cor || '#3b82f6'"
+                    (click)="$event.stopPropagation(); bringEventToFront(evento)">
+                    <p class="event-time">{{ evento.inicio.toFormat('HH:mm') }} - {{ evento.fim.toFormat('HH:mm') }}</p>
                     <p class="event-title">{{ evento.titulo }}</p>
                 </div>
                 }

@@ -23,7 +23,19 @@
   color: #6b7280;
   border-bottom: 1px solid #e5e7eb;
 }
+.event-chip-content {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
+  .event-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
 .day-cell {
   border-bottom: 1px solid #e5e7eb;
   border-right: 1px solid #e5e7eb;

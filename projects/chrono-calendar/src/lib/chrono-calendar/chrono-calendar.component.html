@@ -2,12 +2,14 @@
   <!-- Cabeçalho -->
   <header class="calendar-header">
     <div class="header-nav">
-      <h1 class="header-title">{{ tituloDoCabecalho() }}</h1>
+      <button class="today-button" (click)="irParaHoje()">Hoje</button>
+
       <div class="nav-buttons">
         <button class="nav-button" (click)="irParaAnterior()">‹</button>
         <button class="nav-button" (click)="irParaProximo()">›</button>
       </div>
-      <button class="today-button" (click)="irParaHoje()">Hoje</button>
+
+      <h1 class="header-title">{{ tituloDoCabecalho() }}</h1>
     </div>
 
     <!-- Seletores de Visualização -->

@@ -16,6 +16,7 @@ import {
 } from '../calendar.model';
 import { SemanalViewComponent } from '../views/semanal-view/semanal-view.component';
 import { DiarioViewComponent } from '../views/diario-view/diario-view.component';
+import { DateTime } from 'luxon';
 
 @Component({
   selector: 'chrono-calendar',
@@ -34,15 +35,17 @@ export class ChronoCalendarComponent implements OnInit {
   set eventos(listaEventos: EventoCalendario[]) {
     this.eventosSignal.set(this.mapearEventosPorDia(listaEventos));
   }
-
+  dataAtual = signal(DateTime.now());
   @Input() visualizacaoInicial: TipoDeVisualizacao = 'mensal';
 
-  @Output() diaClicado = new EventEmitter<Date>();
+  @Output() diaClicado = new EventEmitter<DateTime>();
   @Output() eventoClicado = new EventEmitter<EventoCalendario>();
   @Output() mudancaDeVisualizacao = new EventEmitter<TipoDeVisualizacao>();
-  @Output() mudancaDeMes = new EventEmitter<{ inicio: Date; fim: Date }>();
+  @Output() mudancaDeMes = new EventEmitter<{
+    inicio: DateTime;
+    fim: DateTime;
+  }>();
 
-  dataAtual = signal(new Date());
   visualizacaoAtual = signal<TipoDeVisualizacao>(this.visualizacaoInicial);
   eventosSignal = signal<{ [chave: string]: EventoCalendario[] }>({});
 
@@ -50,29 +53,19 @@ export class ChronoCalendarComponent implements OnInit {
     const data = this.dataAtual();
     switch (this.visualizacaoAtual()) {
       case 'mensal':
-        return data.toLocaleDateString('pt-BR', {
-          month: 'long',
-          year: 'numeric',
-        });
+        return data.toFormat('LLLL yyyy', { locale: 'pt-BR' });
       case 'semanal':
-        const inicioSemana = new Date(data);
-        inicioSemana.setDate(data.getDate() - data.getDay());
-        const fimSemana = new Date(inicioSemana);
-        fimSemana.setDate(inicioSemana.getDate() + 6);
-        return `${inicioSemana.toLocaleDateString('pt-BR', {
-          day: '2-digit',
-          month: 'long',
-        })} - ${fimSemana.toLocaleDateString('pt-BR', {
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
+        const inicioSemana = data.startOf('week');
+        const fimSemana = data.endOf('week');
+
+        return `${inicioSemana.toFormat("dd 'de' LLLL", {
+          locale: 'pt-BR',
+        })} - ${fimSemana.toFormat("dd 'de' LLLL 'de' yyyy", {
+          locale: 'pt-BR',
         })}`;
       case 'diario':
-        return data.toLocaleDateString('pt-BR', {
-          weekday: 'long',
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric',
+        return data.toFormat("cccc, dd 'de' LLLL 'de' yyyy", {
+          locale: 'pt-BR',
         });
       default:
         return '';
@@ -83,21 +76,28 @@ export class ChronoCalendarComponent implements OnInit {
     switch (this.visualizacaoAtual()) {
       case 'mensal':
         return this.gerarDiasDoMes();
+
       case 'semanal':
         return this.gerarDiasDaSemana();
+
       case 'diario':
-        const data = new Date(this.dataAtual());
-        data.setHours(0, 0, 0, 0);
-        const hoje = new Date();
+        const data = this.dataAtual().startOf('day');
+
+        const hoje = DateTime.now();
+
         const chaveData = this.formatarChaveData(data);
+
         return [
           {
             data: data,
             eMesAtual: true,
+
             eHoje: this.saoMesmoDia(data, hoje),
+
             eventos: this.eventosSignal()[chaveData] || [],
           },
         ];
+
       default:
         return [];
     }
@@ -121,23 +121,19 @@ export class ChronoCalendarComponent implements OnInit {
   }
 
   irParaHoje(): void {
-    this.dataAtual.set(new Date());
+    this.dataAtual.set(DateTime.now());
   }
 
-  private avancarRecuarData(data: Date, direcao: 1 | -1): Date {
-    const novaData = new Date(data);
+  private avancarRecuarData(data: DateTime, direcao: 1 | -1): DateTime {
     switch (this.visualizacaoAtual()) {
       case 'mensal':
-        novaData.setMonth(data.getMonth() + direcao);
-        break;
+        return data.plus({ months: direcao });
       case 'semanal':
-        novaData.setDate(data.getDate() + 7 * direcao);
-        break;
+        return data.plus({ weeks: direcao });
       case 'diario':
-        novaData.setDate(data.getDate() + direcao);
-        break;
+        return data.plus({ days: direcao });
     }
-    return novaData;
+    return data;
   }
 
   private mapearEventosPorDia(eventos: EventoCalendario[]): {
@@ -154,60 +150,33 @@ export class ChronoCalendarComponent implements OnInit {
     return mapa;
   }
 
-  private formatarChaveData(data: Date): string {
-    return `${data.getFullYear()}-${(data.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${data.getDate().toString().padStart(2, '0')}`;
+  private formatarChaveData(data: DateTime): string {
+    return data.toISODate() as string;
   }
 
-  private saoMesmoDia(data1: Date, data2: Date): boolean {
-    return (
-      data1.getFullYear() === data2.getFullYear() &&
-      data1.getMonth() === data2.getMonth() &&
-      data1.getDate() === data2.getDate()
-    );
+  private saoMesmoDia(data1: DateTime, data2: DateTime): boolean {
+    return data1.hasSame(data2, 'day');
   }
 
   private gerarDiasDoMes(): DiaCalendario[] {
-    const ano = this.dataAtual().getFullYear();
-    const mes = this.dataAtual().getMonth();
+    const dataReferencia = this.dataAtual();
     const eventos = this.eventosSignal();
-    const primeiroDiaDoMes = new Date(ano, mes, 1);
-    const ultimoDiaDoMes = new Date(ano, mes + 1, 0);
-    const primeiroDiaDaSemana = primeiroDiaDoMes.getDay();
-    const totalDeDias = ultimoDiaDoMes.getDate();
-    let dias: DiaCalendario[] = [];
-    const hoje = new Date();
+    const hoje = DateTime.now();
 
-    const ultimoDiaDoMesAnterior = new Date(ano, mes, 0).getDate();
-    for (let i = primeiroDiaDaSemana; i > 0; i--) {
-      dias.push({
-        data: new Date(ano, mes - 1, ultimoDiaDoMesAnterior - i + 1),
-        eMesAtual: false,
-        eHoje: false,
-        eventos: [],
-      });
-    }
+    const primeiroDiaDoMes = dataReferencia.startOf('month');
+    let diaCorrente = primeiroDiaDoMes.startOf('week');
 
-    for (let i = 1; i <= totalDeDias; i++) {
-      const data = new Date(ano, mes, i);
-      const chaveData = this.formatarChaveData(data);
+    const dias: DiaCalendario[] = [];
+
+    for (let i = 0; i < 42; i++) {
+      const chaveData = this.formatarChaveData(diaCorrente);
       dias.push({
-        data,
-        eMesAtual: true,
-        eHoje: this.saoMesmoDia(data, hoje),
+        data: diaCorrente,
+        eMesAtual: diaCorrente.month === dataReferencia.month,
+        eHoje: this.saoMesmoDia(diaCorrente, hoje),
         eventos: eventos[chaveData] || [],
       });
-    }
-
-    const ultimoDiaDaSemana = ultimoDiaDoMes.getDay();
-    for (let i = 1; i <= 6 - ultimoDiaDaSemana; i++) {
-      dias.push({
-        data: new Date(ano, mes + 1, i),
-        eMesAtual: false,
-        eHoje: false,
-        eventos: [],
-      });
+      diaCorrente = diaCorrente.plus({ days: 1 });
     }
     return dias;
   }
@@ -215,16 +184,13 @@ export class ChronoCalendarComponent implements OnInit {
   private gerarDiasDaSemana(): DiaCalendario[] {
     const dataBase = this.dataAtual();
     const eventos = this.eventosSignal();
-    const inicioSemana = new Date(dataBase);
-    inicioSemana.setHours(0, 0, 0, 0);
-    inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+    const inicioSemana = dataBase.startOf('week');
+    const hoje = DateTime.now();
 
-    let dias: DiaCalendario[] = [];
-    const hoje = new Date();
+    const dias: DiaCalendario[] = [];
 
     for (let i = 0; i < 7; i++) {
-      const data = new Date(inicioSemana);
-      data.setDate(inicioSemana.getDate() + i);
+      const data = inicioSemana.plus({ days: i });
       const chaveData = this.formatarChaveData(data);
       dias.push({
         data,

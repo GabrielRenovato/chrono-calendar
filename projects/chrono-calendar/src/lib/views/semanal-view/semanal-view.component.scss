@@ -19,6 +19,7 @@
   background-color: #fff;
   z-index: 20;
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding-right: 17px;
 }
 
 .hour-gutter-header {
@@ -102,25 +103,24 @@
 
 .event-card {
   position: absolute;
-  left: 0.25rem;
-  right: 0.25rem;
-  padding: 0.5rem;
+  box-sizing: border-box;
+  padding: 0.2rem 0.4rem;
   color: #fff;
-  z-index: 10;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  border-radius: 0.375rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, box-shadow 0.2s;
 
   &:hover {
     opacity: 0.9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 
   .event-time {
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.75rem;
   }
 

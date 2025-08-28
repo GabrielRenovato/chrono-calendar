@@ -6,12 +6,21 @@
 <div class="month-grid-body">
     @for (dia of dias; track dia.data) {
     <div class="day-cell" [class.not-current-month]="!dia.eMesAtual" (click)="diaClicado.emit(dia.data)">
-        <span class="day-number" [class.today]="dia.eHoje">{{ dia.data.getDate() }}</span>
+
+        <span class="day-number" [class.today]="dia.eHoje">{{ dia.data.day }}</span>
+
         <div class="events-container">
             @for (evento of dia.eventos; track evento.id) {
             <div class="event-chip" [style.background-color]="evento.cor || '#3b82f6'"
                 (click)="$event.stopPropagation(); eventoClicado.emit(evento)">
-                <p class="event-title">{{ evento.titulo }}</p>
+
+                <div class="event-chip-content">
+                    <strong>{{ evento.inicio.toFormat('HH:mm') }}</strong>
+
+                    <p class="event-title" [appTooltip]="evento.inicio.toFormat('HH:mm') + ' ' + evento.titulo">
+                        {{ evento.titulo }}
+                    </p>
+                </div>
             </div>
             }
         </div>
