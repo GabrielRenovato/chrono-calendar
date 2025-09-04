@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChronoCalendarComponent } from 'projects/chrono-calendar/src/lib/chrono-calendar/chrono-calendar.component';
-import { EventoCalendario } from 'projects/chrono-calendar/src/public-api';
+import { CalendarEvent } from 'projects/chrono-calendar/src/lib/calendar.model';
 import { DateTime } from 'luxon';
 
 @Component({
@@ -12,29 +12,29 @@ import { DateTime } from 'luxon';
   styleUrl: './basic-usage.component.scss',
 })
 export class BasicUsageComponent implements OnInit {
-  meusEventos: EventoCalendario[] = [];
+  myEvents: CalendarEvent[] = [];
 
   ngOnInit(): void {
-    this.meusEventos = this.gerarEventosAleatorios(20);
+    this.myEvents = this.generateRandomEvents(20);
   }
 
-  private gerarEventosAleatorios(quantidade: number): EventoCalendario[] {
-    const eventos: EventoCalendario[] = [];
-    const hoje = DateTime.now();
-    const diasNoMes = hoje.daysInMonth;
+  private generateRandomEvents(quantity: number): CalendarEvent[] {
+    const events: CalendarEvent[] = [];
+    const today = DateTime.now();
+    const daysInMonth = today.daysInMonth;
 
-    const titulos = [
-      'Reunião de Alinhamento',
+    const titles = [
+      'Alignment Meeting',
       'Daily Scrum',
-      'Entrevista Candidato',
-      'Almoço com Cliente',
-      'Planejamento da Sprint',
-      'Sessão de Brainstorm',
-      'Apresentação de Resultados testando tooltip',
-      'Consulta Médica',
-      'Workshop de Design',
+      'Candidate Interview',
+      'Lunch with Client',
+      'Sprint Planning',
+      'Brainstorm Session',
+      'Results Presentation testing tooltip',
+      'Medical Appointment',
+      'Design Workshop',
     ];
-    const cores = [
+    const colors = [
       '#007bff',
       '#28a745',
       '#dc3545',
@@ -45,46 +45,46 @@ export class BasicUsageComponent implements OnInit {
       '#e83e8c',
     ];
 
-    for (let i = 1; i <= quantidade; i++) {
-      let inicio: DateTime;
-      let fim: DateTime;
-      const duracaoAleatoria = (Math.floor(Math.random() * 3) + 1) * 30;
+    for (let i = 1; i <= quantity; i++) {
+      let start: DateTime;
+      let end: DateTime;
+      const randomDuration = (Math.floor(Math.random() * 3) + 1) * 30;
 
       if (i > 1 && i % 3 === 0) {
-        const eventoAnterior = eventos[eventos.length - 1];
+        const previousEvent = events[events.length - 1];
 
-        inicio = eventoAnterior.inicio.plus({ minutes: 30 });
-        fim = inicio.plus({ minutes: duracaoAleatoria });
+        start = previousEvent.start.plus({ minutes: 30 });
+        end = start.plus({ minutes: randomDuration });
       } else {
-        const diaAleatorio = Math.floor(Math.random() * diasNoMes!) + 1;
-        const horaInicioAleatoria = Math.floor(Math.random() * 10) + 8;
-        const minutoInicioAleatorio = Math.floor(Math.random() * 4) * 15;
+        const randomDay = Math.floor(Math.random() * daysInMonth!) + 1;
+        const randomStartHour = Math.floor(Math.random() * 10) + 8;
+        const randomStartMinute = Math.floor(Math.random() * 4) * 15;
 
-        inicio = hoje.set({
-          day: diaAleatorio,
-          hour: horaInicioAleatoria,
-          minute: minutoInicioAleatorio,
+        start = today.set({
+          day: randomDay,
+          hour: randomStartHour,
+          minute: randomStartMinute,
           second: 0,
           millisecond: 0,
         });
-        fim = inicio.plus({ minutes: duracaoAleatoria });
+        end = start.plus({ minutes: randomDuration });
       }
 
-      eventos.push({
+      events.push({
         id: i,
-        titulo: titulos[Math.floor(Math.random() * titulos.length)],
-        inicio: inicio,
-        fim: fim,
-        cor: cores[Math.floor(Math.random() * cores.length)],
+        title: titles[Math.floor(Math.random() * titles.length)],
+        start: start,
+        end: end,
+        color: colors[Math.floor(Math.random() * colors.length)],
       });
     }
 
-    return eventos;
+    return events;
   }
 
-  handleEventoClicado(evento: EventoCalendario) {
-    console.log('Evento clicado na aplicação:', evento);
-    alert(`Evento: ${evento.titulo}`);
+  handleEventClicked(event: CalendarEvent) {
+    console.log('Event clicked in application:', event);
+    alert(`Event: ${event.title}`);
   }
 
   codeSnippetModule = `
@@ -95,36 +95,40 @@ import { ChronoCalendarComponent } from 'chrono-calendar';
   imports: [ChronoCalendarComponent],
   ...
 })
-export class SeuComponente { ... }`;
+export class YourComponent { ... }`;
 
   codeSnippetHtml = `
 <chrono-calendar
-  [eventos]="meusEventos"
-  [visualizacaoInicial]="'mensal'"
-  (eventoClicado)="handleEventoClicado($event)">
+  [events]="myEvents"
+  [initialView]="'monthly'"
+  [todayButtonText]="'Daily'"
+  [monthViewText]="'Monthly'"
+  [weekViewText]="'Weekly'"
+  [dayViewText]="'Dia'"
+  (eventClicked)="handleEventClicked($event)">
 </chrono-calendar>`;
 
   codeSnippetTs = `
 import { Component, OnInit } from '@angular/core';
-import { EventoCalendario } from 'chrono-calendar';
+import { CalendarEvent } from 'chrono-calendar';
 import { DateTime } from 'luxon';
 
 @Component({ ... })
-export class SeuComponente implements OnInit {
+export class YourComponent implements OnInit {
 
-  meusEventos: EventoCalendario[] = [];
+  myEvents: CalendarEvent[] = [];
 
   ngOnInit(): void {
-    this.meusEventos = this.gerarEventosAleatorios(20);
+    this.myEvents = this.generateRandomEvents(20);
   }
 
-  private gerarEventosAleatorios(quantidade: number): EventoCalendario[] {
+  private generateRandomEvents(quantity: number): CalendarEvent[] {
     
     return [];
   }
 
-  handleEventoClicado(evento: EventoCalendario) {
-    alert(\`Evento: \${evento.titulo}\`);
+  handleEventClicked(event: CalendarEvent) {
+    alert(\`Event: \${event.title}\`);
   }
 }`;
 }

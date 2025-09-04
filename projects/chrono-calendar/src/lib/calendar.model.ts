@@ -1,24 +1,24 @@
-import { DateTime } from 'luxon'; // 1. Importe o DateTime
+import { DateTime } from 'luxon'; // 1. Import DateTime
 
-export type TipoDeVisualizacao = 'mensal' | 'semanal' | 'diario';
+export type ViewType = 'monthly' | 'weekly' | 'daily';
 
-export interface EventoCalendario {
+export interface CalendarEvent {
   id: string | number;
-  titulo: string;
-  inicio: DateTime; // 2. Substitua Date por DateTime
-  fim: DateTime; // 3. Substitua Date por DateTime
-  cor?: string;
+  title: string;
+  start: DateTime;
+  end: DateTime;
+  color?: string;
   layout?: {
-    largura: number; // Em %
-    esquerda: number; // Em %
-    coluna: number;
-    totalColunas: number;
+    width: number;
+    left: number;
+    column: number;
+    totalColumns: number;
   };
 }
 
-export interface DiaCalendario {
-  data: DateTime; // 4. Substitua Date por DateTime
-  eventos: EventoCalendario[];
-  eHoje: boolean;
-  eMesAtual: boolean;
+export interface CalendarDay {
+  date: DateTime;
+  events: CalendarEvent[];
+  isToday: boolean;
+  isCurrentMonth: boolean;
 }

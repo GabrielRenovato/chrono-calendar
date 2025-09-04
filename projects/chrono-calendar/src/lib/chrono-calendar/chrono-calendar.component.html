@@ -1,44 +1,39 @@
 <div class="calendar-wrapper">
-  <!-- Cabeçalho -->
   <header class="calendar-header">
     <div class="header-nav">
-      <button class="today-button" (click)="irParaHoje()">Hoje</button>
+      <button class="today-button" (click)="goToToday()">{{ todayButtonText }}</button>
 
       <div class="nav-buttons">
-        <button class="nav-button" (click)="irParaAnterior()">‹</button>
-        <button class="nav-button" (click)="irParaProximo()">›</button>
+        <button class="nav-button" (click)="goToPrevious()">‹</button>
+        <button class="nav-button" (click)="goToNext()">›</button>
       </div>
 
-      <h1 class="header-title">{{ tituloDoCabecalho() }}</h1>
+      <h1 class="header-title">{{ headerTitle() }}</h1>
     </div>
-
-    <!-- Seletores de Visualização -->
     <div class="view-switcher">
-      <button class="view-button" [class.active]="visualizacaoAtual() === 'mensal'"
-        (click)="definirVisualizacao('mensal')">Mês</button>
-      <button class="view-button" [class.active]="visualizacaoAtual() === 'semanal'"
-        (click)="definirVisualizacao('semanal')">Semana</button>
-      <button class="view-button" [class.active]="visualizacaoAtual() === 'diario'"
-        (click)="definirVisualizacao('diario')">Dia</button>
+      <button class="view-button" [class.active]="currentView() === 'monthly'" (click)="setView('monthly')">{{
+        monthViewText }}</button>
+      <button class="view-button" [class.active]="currentView() === 'weekly'" (click)="setView('weekly')">{{
+        weekViewText }}</button>
+      <button class="view-button" [class.active]="currentView() === 'daily'" (click)="setView('daily')">{{ dayViewText
+        }}</button>
     </div>
   </header>
-
-  <!-- Corpo do Calendário -->
   <div class="calendar-body">
-    @switch (visualizacaoAtual()) {
-    @case ('mensal') {
-    <app-mensal-view [dias]="diasParaExibir()" (diaClicado)="diaClicado.emit($event)"
-      (eventoClicado)="eventoClicado.emit($event)">
-    </app-mensal-view>
+    @switch (currentView()) {
+    @case ('monthly') {
+    <app-monthly-view [days]="daysToDisplay()" (dayClicked)="dayClicked.emit($event)"
+      (eventClicked)="eventClicked.emit($event)">
+    </app-monthly-view>
     }
-    @case ('semanal') {
-    <app-semanal-view [dias]="diasParaExibir()" (diaClicado)="diaClicado.emit($event)"
-      (eventoClicado)="eventoClicado.emit($event)">
-    </app-semanal-view>
+    @case ('weekly') {
+    <app-weekly-view [days]="daysToDisplay()" (dayClicked)="dayClicked.emit($event)"
+      (eventClicked)="eventClicked.emit($event)">
+    </app-weekly-view>
     }
-    @case ('diario') {
-    <app-diario-view [dia]="diasParaExibir()[0]" (eventoClicado)="eventoClicado.emit($event)">
-    </app-diario-view>
+    @case ('daily') {
+    <app-daily-view [day]="daysToDisplay()[0]" (eventClicked)="eventClicked.emit($event)">
+    </app-daily-view>
     }
     }
   </div>

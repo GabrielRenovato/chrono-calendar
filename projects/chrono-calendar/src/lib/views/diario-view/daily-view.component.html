@@ -1,0 +1,23 @@
+@if (day) {
+<div class="day-view-wrapper">
+    <div class="hour-gutter">
+        @for(hour of hoursOfDay; track hour) {
+        <div class="hour-segment">
+            <span class="hour-label">{{ hour }}</span>
+        </div>
+        }
+    </div>
+    <div class="day-container">
+        @for(hour of hoursOfDay; track hour) {
+        <div class="hour-line"></div>
+        }
+        @for(event of day.events; track event.id) {
+        <div class="event-card" [ngStyle]="eventLayouts.get(event.id)"
+            [style.background-color]="event.color || '#3b82f6'" (click)="eventClicked.emit(event)">
+            <p class="event-time">{{ event.start.toFormat('HH:mm') }} - {{ event.end.toFormat('HH:mm') }}</p>
+            <p class="event-title">{{ event.title }}</p>
+        </div>
+        }
+    </div>
+</div>
+}

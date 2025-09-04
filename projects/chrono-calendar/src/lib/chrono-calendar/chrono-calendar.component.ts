@@ -8,93 +8,97 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MensalViewComponent } from '../views/mensal-view/mensal-view.component';
-import {
-  DiaCalendario,
-  EventoCalendario,
-  TipoDeVisualizacao,
-} from '../calendar.model';
-import { SemanalViewComponent } from '../views/semanal-view/semanal-view.component';
-import { DiarioViewComponent } from '../views/diario-view/diario-view.component';
+
+import { CalendarDay, CalendarEvent, ViewType } from '../calendar.model';
+
 import { DateTime } from 'luxon';
+import { WeeklyViewComponent } from '../views/semanal-view/weekly-view.component';
+import { MonthlyViewComponent } from '../views/mensal-view/monthly-view.component';
+import { DailyViewComponent } from '../views/diario-view/daily-view.component';
 
 @Component({
   selector: 'chrono-calendar',
   standalone: true,
   imports: [
     CommonModule,
-    MensalViewComponent,
-    SemanalViewComponent,
-    DiarioViewComponent,
+    MonthlyViewComponent,
+    WeeklyViewComponent,
+    DailyViewComponent,
   ],
   templateUrl: './chrono-calendar.component.html',
   styleUrl: './chrono-calendar.component.scss',
 })
 export class ChronoCalendarComponent implements OnInit {
   @Input()
-  set eventos(listaEventos: EventoCalendario[]) {
-    this.eventosSignal.set(this.mapearEventosPorDia(listaEventos));
+  set events(eventList: CalendarEvent[]) {
+    this.eventsSignal.set(this.mapEventsByDay(eventList));
   }
-  dataAtual = signal(DateTime.now());
-  @Input() visualizacaoInicial: TipoDeVisualizacao = 'mensal';
+  currentDate = signal(DateTime.now());
+  @Input() initialView: ViewType = 'monthly';
+  @Input() todayButtonText: string = 'Today';
+  @Input() monthViewText: string = 'Month';
+  @Input() weekViewText: string = 'Week';
+  @Input() dayViewText: string = 'Day';
 
-  @Output() diaClicado = new EventEmitter<DateTime>();
-  @Output() eventoClicado = new EventEmitter<EventoCalendario>();
-  @Output() mudancaDeVisualizacao = new EventEmitter<TipoDeVisualizacao>();
-  @Output() mudancaDeMes = new EventEmitter<{
-    inicio: DateTime;
-    fim: DateTime;
+  @Output() dayClicked = new EventEmitter<DateTime>();
+  @Output() eventClicked = new EventEmitter<CalendarEvent>();
+  @Output() viewChange = new EventEmitter<ViewType>();
+  @Output() monthChange = new EventEmitter<{
+    start: DateTime;
+    end: DateTime;
   }>();
 
-  visualizacaoAtual = signal<TipoDeVisualizacao>(this.visualizacaoInicial);
-  eventosSignal = signal<{ [chave: string]: EventoCalendario[] }>({});
+  currentView = signal<ViewType>(this.initialView);
+  eventsSignal = signal<{ [key: string]: CalendarEvent[] }>({});
 
-  tituloDoCabecalho = computed(() => {
-    const data = this.dataAtual();
-    switch (this.visualizacaoAtual()) {
-      case 'mensal':
-        return data.toFormat('LLLL yyyy', { locale: 'pt-BR' });
-      case 'semanal':
-        const inicioSemana = data.startOf('week');
-        const fimSemana = data.endOf('week');
+  headerTitle = computed(() => {
+    const date = this.currentDate();
+    const userLocale = Intl.DateTimeFormat().resolvedOptions().locale;
 
-        return `${inicioSemana.toFormat("dd 'de' LLLL", {
-          locale: 'pt-BR',
-        })} - ${fimSemana.toFormat("dd 'de' LLLL 'de' yyyy", {
-          locale: 'pt-BR',
+    switch (this.currentView()) {
+      case 'monthly':
+        return date.toFormat('LLLL yyyy', { locale: userLocale });
+      case 'weekly':
+        const weekStart = date.startOf('week');
+        const weekEnd = date.endOf('week');
+
+        return `${weekStart.toFormat('LLL dd', {
+          locale: userLocale,
+        })} - ${weekEnd.toFormat('LLL dd, yyyy', {
+          locale: userLocale,
         })}`;
-      case 'diario':
-        return data.toFormat("cccc, dd 'de' LLLL 'de' yyyy", {
-          locale: 'pt-BR',
+      case 'daily':
+        return date.toFormat('cccc, LLLL dd, yyyy', {
+          locale: userLocale,
         });
       default:
         return '';
     }
   });
 
-  diasParaExibir = computed((): DiaCalendario[] => {
-    switch (this.visualizacaoAtual()) {
-      case 'mensal':
-        return this.gerarDiasDoMes();
+  daysToDisplay = computed((): CalendarDay[] => {
+    switch (this.currentView()) {
+      case 'monthly':
+        return this.generateMonthDays();
 
-      case 'semanal':
-        return this.gerarDiasDaSemana();
+      case 'weekly':
+        return this.generateWeekDays();
 
-      case 'diario':
-        const data = this.dataAtual().startOf('day');
+      case 'daily':
+        const date = this.currentDate().startOf('day');
 
-        const hoje = DateTime.now();
+        const today = DateTime.now();
 
-        const chaveData = this.formatarChaveData(data);
+        const dateKey = this.formatDateKey(date);
 
         return [
           {
-            data: data,
-            eMesAtual: true,
+            date: date,
+            isCurrentMonth: true,
 
-            eHoje: this.saoMesmoDia(data, hoje),
+            isToday: this.isSameDay(date, today),
 
-            eventos: this.eventosSignal()[chaveData] || [],
+            events: this.eventsSignal()[dateKey] || [],
           },
         ];
 
@@ -104,101 +108,101 @@ export class ChronoCalendarComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.visualizacaoAtual.set(this.visualizacaoInicial);
+    this.currentView.set(this.initialView);
   }
 
-  definirVisualizacao(tipo: TipoDeVisualizacao): void {
-    this.visualizacaoAtual.set(tipo);
-    this.mudancaDeVisualizacao.emit(tipo);
+  setView(type: ViewType): void {
+    this.currentView.set(type);
+    this.viewChange.emit(type);
   }
 
-  irParaAnterior(): void {
-    this.dataAtual.update((data) => this.avancarRecuarData(data, -1));
+  goToPrevious(): void {
+    this.currentDate.update((date) => this.advanceRetreatDate(date, -1));
   }
 
-  irParaProximo(): void {
-    this.dataAtual.update((data) => this.avancarRecuarData(data, 1));
+  goToNext(): void {
+    this.currentDate.update((date) => this.advanceRetreatDate(date, 1));
   }
 
-  irParaHoje(): void {
-    this.dataAtual.set(DateTime.now());
+  goToToday(): void {
+    this.currentDate.set(DateTime.now());
   }
 
-  private avancarRecuarData(data: DateTime, direcao: 1 | -1): DateTime {
-    switch (this.visualizacaoAtual()) {
-      case 'mensal':
-        return data.plus({ months: direcao });
-      case 'semanal':
-        return data.plus({ weeks: direcao });
-      case 'diario':
-        return data.plus({ days: direcao });
+  private advanceRetreatDate(date: DateTime, direction: 1 | -1): DateTime {
+    switch (this.currentView()) {
+      case 'monthly':
+        return date.plus({ months: direction });
+      case 'weekly':
+        return date.plus({ weeks: direction });
+      case 'daily':
+        return date.plus({ days: direction });
     }
-    return data;
+    return date;
   }
 
-  private mapearEventosPorDia(eventos: EventoCalendario[]): {
-    [chave: string]: EventoCalendario[];
+  private mapEventsByDay(events: CalendarEvent[]): {
+    [key: string]: CalendarEvent[];
   } {
-    const mapa: { [chave: string]: EventoCalendario[] } = {};
-    for (const evento of eventos) {
-      const chave = this.formatarChaveData(evento.inicio);
-      if (!mapa[chave]) {
-        mapa[chave] = [];
+    const map: { [key: string]: CalendarEvent[] } = {};
+    for (const event of events) {
+      const key = this.formatDateKey(event.start);
+      if (!map[key]) {
+        map[key] = [];
       }
-      mapa[chave].push(evento);
+      map[key].push(event);
     }
-    return mapa;
+    return map;
   }
 
-  private formatarChaveData(data: DateTime): string {
-    return data.toISODate() as string;
+  private formatDateKey(date: DateTime): string {
+    return date.toISODate() as string;
   }
 
-  private saoMesmoDia(data1: DateTime, data2: DateTime): boolean {
-    return data1.hasSame(data2, 'day');
+  private isSameDay(date1: DateTime, date2: DateTime): boolean {
+    return date1.hasSame(date2, 'day');
   }
 
-  private gerarDiasDoMes(): DiaCalendario[] {
-    const dataReferencia = this.dataAtual();
-    const eventos = this.eventosSignal();
-    const hoje = DateTime.now();
+  private generateMonthDays(): CalendarDay[] {
+    const referenceDate = this.currentDate();
+    const events = this.eventsSignal();
+    const today = DateTime.now();
 
-    const primeiroDiaDoMes = dataReferencia.startOf('month');
-    let diaCorrente = primeiroDiaDoMes.startOf('week');
+    const firstDayOfMonth = referenceDate.startOf('month');
+    let currentDay = firstDayOfMonth.startOf('week');
 
-    const dias: DiaCalendario[] = [];
+    const days: CalendarDay[] = [];
 
     for (let i = 0; i < 42; i++) {
-      const chaveData = this.formatarChaveData(diaCorrente);
-      dias.push({
-        data: diaCorrente,
-        eMesAtual: diaCorrente.month === dataReferencia.month,
-        eHoje: this.saoMesmoDia(diaCorrente, hoje),
-        eventos: eventos[chaveData] || [],
+      const dateKey = this.formatDateKey(currentDay);
+      days.push({
+        date: currentDay,
+        isCurrentMonth: currentDay.month === referenceDate.month,
+        isToday: this.isSameDay(currentDay, today),
+        events: events[dateKey] || [],
       });
-      diaCorrente = diaCorrente.plus({ days: 1 });
+      currentDay = currentDay.plus({ days: 1 });
     }
-    return dias;
+    return days;
   }
 
-  private gerarDiasDaSemana(): DiaCalendario[] {
-    const dataBase = this.dataAtual();
-    const eventos = this.eventosSignal();
-    const inicioSemana = dataBase.startOf('week');
-    const hoje = DateTime.now();
+  private generateWeekDays(): CalendarDay[] {
+    const baseDate = this.currentDate();
+    const events = this.eventsSignal();
+    const weekStart = baseDate.startOf('week');
+    const today = DateTime.now();
 
-    const dias: DiaCalendario[] = [];
+    const days: CalendarDay[] = [];
 
     for (let i = 0; i < 7; i++) {
-      const data = inicioSemana.plus({ days: i });
-      const chaveData = this.formatarChaveData(data);
-      dias.push({
-        data,
-        eMesAtual: true,
-        eHoje: this.saoMesmoDia(data, hoje),
-        eventos: eventos[chaveData] || [],
+      const date = weekStart.plus({ days: i });
+      const dateKey = this.formatDateKey(date);
+      days.push({
+        date,
+        isCurrentMonth: true,
+        isToday: this.isSameDay(date, today),
+        events: events[dateKey] || [],
       });
     }
-    return dias;
+    return days;
   }
 }

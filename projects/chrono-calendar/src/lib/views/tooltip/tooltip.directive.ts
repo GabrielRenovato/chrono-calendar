@@ -27,18 +27,10 @@ export class TooltipDirective {
   onMouseEnter(): void {
     const hostElement = this.elementRef.nativeElement;
 
-    console.log('1. Mouse entrou:', hostElement);
-
-    console.log(
-      `2. Verificando Overflow: scrollWidth=${hostElement.scrollWidth}, clientWidth=${hostElement.clientWidth}`
-    );
-
     if (
       hostElement.scrollWidth > hostElement.clientWidth &&
       !this.tooltipComponentRef
     ) {
-      console.log('3. Overflow Detectado! Criando o tooltip...');
-
       this.tooltipComponentRef =
         this.viewContainerRef.createComponent(TooltipComponent);
 
@@ -54,8 +46,6 @@ export class TooltipDirective {
 
       requestAnimationFrame(() => {
         if (this.tooltipComponentRef) {
-          console.log('4. Posicionando o tooltip...');
-
           const hostPos = hostElement.getBoundingClientRect();
           this.tooltipComponentRef.instance.setPosition(hostPos);
         }

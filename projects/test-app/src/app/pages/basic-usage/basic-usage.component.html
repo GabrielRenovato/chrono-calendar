@@ -1,37 +1,38 @@
 <div class="max-w-full flex flex-col h-full overflow-y-auto p-8">
-    <h2 class="text-4xl font-extrabold text-gray-900 border-b border-gray-300 pb-4">Uso Básico</h2>
+    <h2 class="text-4xl font-extrabold text-gray-900 border-b border-gray-300 pb-4">Basic Usage</h2>
     <p class="mt-4 text-lg text-gray-600">
-        Aprenda a configurar e usar o componente de calendário com uma lista de eventos.
+        Learn how to set up and use the calendar component with a list of events.
     </p>
 
-    <!-- Seção do Exemplo ao Vivo -->
+    <!-- Live Example Section -->
     <section class="mt-12">
-        <h3 class="text-2xl font-bold text-gray-900 mb-4">Exemplo</h3>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Example</h3>
         <div class="h-[700px] border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-            <chrono-calendar [eventos]="meusEventos" [visualizacaoInicial]="'mensal'"
-                (eventoClicado)="handleEventoClicado($event)">
+            <chrono-calendar [events]="myEvents" [initialView]="'monthly'" [todayButtonText]="'Today'"
+                (eventClicked)="handleEventClicked($event)" [dayViewText]="'Day'" [weekViewText]="'Week'"
+                [monthViewText]="'Month'">
             </chrono-calendar>
         </div>
     </section>
 
-    <!-- Seção do Código -->
+    <!-- Code Section -->
     <section class="mt-12">
-        <h3 class="text-2xl font-bold text-gray-900 mb-4">Código</h3>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Code</h3>
 
         <div class="mt-6">
-            <h4 class="text-base font-semibold text-gray-700 mb-2">1. Importe o componente</h4>
+            <h4 class="text-base font-semibold text-gray-700 mb-2">1. Import the component</h4>
             <pre
                 class="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto font-mono text-sm"><code>{{ codeSnippetModule }}</code></pre>
         </div>
 
         <div class="mt-6">
-            <h4 class="text-base font-semibold text-gray-700 mb-2">2. Use no seu Template (.html)</h4>
+            <h4 class="text-base font-semibold text-gray-700 mb-2">2. Use in your Template (.html)</h4>
             <pre
                 class="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto font-mono text-sm"><code>{{ codeSnippetHtml }}</code></pre>
         </div>
 
         <div class="mt-6">
-            <h4 class="text-base font-semibold text-gray-700 mb-2">3. Forneça os dados (.ts)</h4>
+            <h4 class="text-base font-semibold text-gray-700 mb-2">3. Provide the data (.ts)</h4>
             <pre
                 class="bg-gray-800 text-gray-300 p-4 rounded-lg overflow-x-auto font-mono text-sm"><code>{{ codeSnippetTs }}</code></pre>
         </div>

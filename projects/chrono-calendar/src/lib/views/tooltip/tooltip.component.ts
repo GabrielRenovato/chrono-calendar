@@ -31,9 +31,6 @@ export class TooltipComponent {
 
     const tooltipRect = tooltipEl.getBoundingClientRect();
 
-    console.log('Host position:', hostPos);
-    console.log('Tooltip dimensions:', tooltipRect);
-
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const scrollLeft =
       window.pageXOffset || document.documentElement.scrollLeft;
@@ -59,8 +56,6 @@ export class TooltipComponent {
 
       this.renderer.setStyle(tooltipEl, 'transform-origin', 'center top');
     }
-
-    console.log('Final position:', { top, left });
 
     this.renderer.setStyle(tooltipEl, 'top', `${top}px`);
     this.renderer.setStyle(tooltipEl, 'left', `${left}px`);
