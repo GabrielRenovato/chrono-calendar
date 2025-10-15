@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CalendarEvent } from 'chrono-calendar';
 import { DateTime } from 'luxon';
-import { ChronoCalendarComponent } from 'projects/chrono-calendar/src/public-api';
+import { CalendarEvent, ChronoCalendarComponent } from 'chrono-calendar';
+
 
 @Component({
   selector: 'app-basic-usage',
