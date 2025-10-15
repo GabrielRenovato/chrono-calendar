@@ -22,3 +22,9 @@ export interface CalendarDay {
   isToday: boolean;
   isCurrentMonth: boolean;
 }
+
+export interface EventDroppedInfo {
+  event: CalendarEvent;
+  newDate: DateTime;
+  previousDate: DateTime;
+}

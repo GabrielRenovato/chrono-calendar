@@ -13,6 +13,8 @@
 .hour-gutter {
   width: 4rem;
   flex-shrink: 0;
+  background-color: #fff;
+  z-index: 5;
 }
 
 .hour-segment {
@@ -21,6 +23,7 @@
   text-align: right;
   padding-right: 0.5rem;
   position: relative;
+  background-color: #fff;
 
   .hour-label {
     font-size: 0.75rem;
@@ -31,43 +34,77 @@
 }
 
 .day-container {
-  position: relative;
   flex: 1;
+  position: relative;
+  min-height: calc(24 * 80px);
+}
+
+
+.hour-slot {
+  height: 80px;
+  min-height: 80px;
+  position: relative;
+  z-index: 1;
+  
+  &.cdk-drop-list-receiving {
+    background-color: rgba(59, 130, 246, 0.08);
+    z-index: 2;
+  }
 }
 
 .hour-line {
   height: 80px;
   border-bottom: 1px solid #e5e7eb;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
 }
 
 .event-card {
-  position: absolute;
-  left: 0.25rem;
-  right: 0.25rem;
+  box-sizing: border-box;
   padding: 0.5rem;
   color: #fff;
-  z-index: 10;
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 4px;
   overflow: hidden;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  cursor: pointer;
-  transition: opacity 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: move;
+  pointer-events: auto;
+  will-change: transform; 
+  backface-visibility: hidden; 
 
   &:hover {
-    opacity: 0.9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    z-index: 100 !important;
+  }
+
+  &.cdk-drag-dragging {
+    opacity: 0.7;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000 !important;
   }
 
   .event-time {
     font-weight: 700;
     font-size: 0.75rem;
+    margin: 0;
   }
 
   .event-title {
     font-size: 0.75rem;
+    font-weight: 500;
+    margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }

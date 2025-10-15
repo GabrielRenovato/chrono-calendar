@@ -7,15 +7,25 @@
         </div>
         }
     </div>
-    <div class="day-container">
-        @for(hour of hoursOfDay; track hour) {
-        <div class="hour-line"></div>
-        }
-        @for(event of day.events; track event.id) {
-        <div class="event-card" [ngStyle]="eventLayouts.get(event.id)"
-            [style.background-color]="event.color || '#3b82f6'" (click)="eventClicked.emit(event)">
-            <p class="event-time">{{ event.start.toFormat('HH:mm') }} - {{ event.end.toFormat('HH:mm') }}</p>
-            <p class="event-title">{{ event.title }}</p>
+
+    <div class="day-container" cdkDropListGroup #dayContainer>
+        @for(hour of hoursOfDay; track hour; let hourIndex = $index) {
+        <div class="hour-slot" cdkDropList [cdkDropListDisabled]="!enableDragDrop"
+            [cdkDropListData]="getEventsAtHour(hourIndex)" [id]="getSlotId(hourIndex)"
+            (cdkDropListDropped)="onSlotDrop($event, hourIndex)">
+
+            <div class="hour-line"></div>
+
+            @for(event of getEventsAtHour(hourIndex); track event.id; let eventIndex = $index) {
+            <div class="event-card" [ngStyle]="getEventStyle(event, hourIndex, eventIndex)"
+                [style.background-color]="event.color || '#3b82f6'" [style.cursor]="enableDragDrop ? 'move' : 'pointer'"
+                cdkDrag [cdkDragDisabled]="!enableDragDrop" [cdkDragData]="event" cdkDragBoundary=".day-container"
+                [cdkDragFreeDragPosition]="{x: 0, y: 0}" (click)="$event.stopPropagation(); eventClicked.emit(event)">
+
+                <p class="event-time">{{ event.start.toFormat('HH:mm') }} - {{ event.end.toFormat('HH:mm') }}</p>
+                <p class="event-title">{{ event.title }}</p>
+            </div>
+            }
         </div>
         }
     </div>

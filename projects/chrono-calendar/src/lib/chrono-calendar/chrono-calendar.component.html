@@ -22,17 +22,18 @@
   <div class="calendar-body">
     @switch (currentView()) {
     @case ('monthly') {
-    <app-monthly-view [days]="daysToDisplay()" (dayClicked)="dayClicked.emit($event)"
-      (eventClicked)="eventClicked.emit($event)">
+    <app-monthly-view [enableDragDrop]="enableDragDrop" [days]="daysToDisplay()" (dayClicked)="dayClicked.emit($event)"
+      (eventClicked)="eventClicked.emit($event)" (eventDropped)="eventDropped.emit($event)">
     </app-monthly-view>
     }
     @case ('weekly') {
-    <app-weekly-view [days]="daysToDisplay()" (dayClicked)="dayClicked.emit($event)"
-      (eventClicked)="eventClicked.emit($event)">
+    <app-weekly-view [enableDragDrop]="enableDragDrop" (eventDropped)="eventDropped.emit($event)"
+      [days]="daysToDisplay()" (dayClicked)="dayClicked.emit($event)" (eventClicked)="eventClicked.emit($event)">
     </app-weekly-view>
     }
     @case ('daily') {
-    <app-daily-view [day]="daysToDisplay()[0]" (eventClicked)="eventClicked.emit($event)">
+    <app-daily-view [enableDragDrop]="enableDragDrop" (eventDropped)="eventDropped.emit($event)"
+      [day]="daysToDisplay()[0]" (eventClicked)="eventClicked.emit($event)">
     </app-daily-view>
     }
     }

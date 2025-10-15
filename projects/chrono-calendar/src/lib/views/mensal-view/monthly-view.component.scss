@@ -23,6 +23,7 @@
   color: #6b7280;
   border-bottom: 1px solid #e5e7eb;
 }
+
 .event-chip-content {
   display: flex;
   align-items: center;
@@ -36,6 +37,7 @@
     text-overflow: ellipsis;
   }
 }
+
 .day-cell {
   border-bottom: 1px solid #e5e7eb;
   border-right: 1px solid #e5e7eb;
@@ -44,7 +46,6 @@
   flex-direction: column;
   min-height: 120px;
   cursor: pointer;
-  transition: background-color 0.2s;
 
   &:hover {
     background-color: #f9fafb;
@@ -85,10 +86,57 @@
   font-size: 0.75rem;
   color: #fff;
   border-radius: 0.375rem;
+  cursor: move;
+  will-change: transform; 
+  backface-visibility: hidden; 
+
+  
+  &:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  &.cdk-drag-dragging {
+    opacity: 0.6;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .event-title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
+}
+
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+
+.event-drag-preview {
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  opacity: 0.9;
+  
+  strong {
+    margin-right: 8px;
+  }
+}
+
+
+.event-placeholder {
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px dashed rgba(59, 130, 246, 0.4);
+  border-radius: 4px;
+  min-height: 32px;
+  opacity: 0.5;
+}
+
+
+.cdk-drop-list-receiving {
+  background-color: rgba(59, 130, 246, 0.05);
 }

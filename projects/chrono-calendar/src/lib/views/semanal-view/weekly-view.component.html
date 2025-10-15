@@ -1,13 +1,14 @@
 <div class="week-view-wrapper">
     <div class="week-header">
         <div class="hour-gutter-header"></div>
-        @for (day of days; track day.date) {
+        @for (day of days; track day.date.toISODate()) {
         <div class="day-header" [class.today-header]="day.isToday">
             <p class="weekday-label">{{ weekdays[day.date.weekday % 7] }}</p>
             <p class="day-label" [class.today-number]="day.isToday">{{ day.date.day }}</p>
         </div>
         }
     </div>
+
     <div class="week-body">
         <div class="hour-gutter">
             @for(hour of hoursOfDay; track hour) {
@@ -16,18 +17,29 @@
             </div>
             }
         </div>
-        <div class="days-container">
-            @for (day of days; track day.date) {
-            <div class="day-column" [class.today-column]="day.isToday" (click)="dayClicked.emit(day.date)">
-                @for(hour of hoursOfDay; track hour) {
-                <div class="hour-line"></div>
-                }
-                @for(event of day.events; track event.id) {
-                <div class="event-card" [ngStyle]="eventLayouts.get(event.id)"
-                    [style.background-color]="event.color || '#3b82f6'"
-                    (click)="$event.stopPropagation(); bringEventToFront(event)">
-                    <p class="event-time">{{ event.start.toFormat('HH:mm') }} - {{ event.end.toFormat('HH:mm') }}</p>
-                    <p class="event-title">{{ event.title }}</p>
+
+        <div class="days-container" cdkDropListGroup>
+            @for (day of days; track day.date.toISODate()) {
+            <div class="day-column" [class.today-column]="day.isToday">
+
+                @for(hour of hoursOfDay; track hour; let hourIndex = $index) {
+                <div class="hour-slot" cdkDropList [cdkDropListDisabled]="!enableDragDrop"
+                    [cdkDropListData]="getEventsAtHour(day, hourIndex)" [id]="getSlotId(day, hourIndex)"
+                    (cdkDropListDropped)="onSlotDrop($event, day, hourIndex)">
+
+                    @for(event of getEventsAtHour(day, hourIndex); track event.id; let eventIndex = $index) {
+                    <div class="event-card" [style.background-color]="event.color || '#3b82f6'"
+                        [style.height.px]="getEventHeight(event)"
+                        [style.width]="getEventWidth(day, hourIndex, eventIndex)"
+                        [style.left]="getEventLeft(day, hourIndex, eventIndex)" [style.z-index]="10 + eventIndex"
+                        [style.cursor]="enableDragDrop ? 'move' : 'pointer'" cdkDrag [cdkDragDisabled]="!enableDragDrop"
+                        [cdkDragData]="event" (click)="$event.stopPropagation(); bringEventToFront(event)">
+
+                        <p class="event-time">{{ event.start.toFormat('HH:mm') }} - {{ event.end.toFormat('HH:mm') }}
+                        </p>
+                        <p class="event-title">{{ event.title }}</p>
+                    </div>
+                    }
                 </div>
                 }
             </div>

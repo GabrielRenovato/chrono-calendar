@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { CalendarDay, CalendarEvent, ViewType } from '../calendar.model';
+import { CalendarDay, CalendarEvent, EventDroppedInfo, ViewType } from '../calendar.model';
 
 import { DateTime } from 'luxon';
 import { WeeklyViewComponent } from '../views/semanal-view/weekly-view.component';
@@ -39,7 +39,7 @@ export class ChronoCalendarComponent implements OnInit {
   @Input() monthViewText: string = 'Month';
   @Input() weekViewText: string = 'Week';
   @Input() dayViewText: string = 'Day';
-
+  @Input() enableDragDrop: boolean = true;
   @Output() dayClicked = new EventEmitter<DateTime>();
   @Output() eventClicked = new EventEmitter<CalendarEvent>();
   @Output() viewChange = new EventEmitter<ViewType>();
@@ -47,6 +47,7 @@ export class ChronoCalendarComponent implements OnInit {
     start: DateTime;
     end: DateTime;
   }>();
+  @Output() eventDropped = new EventEmitter<EventDroppedInfo>();
 
   currentView = signal<ViewType>(this.initialView);
   eventsSignal = signal<{ [key: string]: CalendarEvent[] }>({});

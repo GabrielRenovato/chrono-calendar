@@ -1,39 +1,36 @@
 # ⏳ Chrono Calendar
 
-A modern, responsive, and customizable calendar library for **Angular** applications.  
+A **modern, responsive, and customizable calendar library** for **Angular** applications.  
 Built with **Signals** and **standalone components** for simple and performant integration.
 
 ---
 
 ## 🎥 Demo
 
-Visit the official website to view examples and test the features:
-
-🔗 https://chronocalendar.netlify.app/
+👉 [Live Demo & Documentation](https://chronocalendar.netlify.app/)
 
 ---
 
 ## ✨ Features
 
-- **Multiple Views** → Easily switch between **monthly**, **weekly**, and **daily** views.
-- **Standalone Components** → Integrate into any modern Angular project **without NgModules**.
-- **Simple API** → Use **@Input** to provide events and **@Output** to capture interactions.
-- **Minimal and Robust Dependencies** → Uses **Luxon** for precise and reliable date manipulation.
-- **Lightweight and Performant** → Built with **Signals** for maximum reactivity.
-- **Internationalization Ready** → Customizable button texts for any language.
-- **Automatic Locale Detection** → Date formatting adapts to the user's browser locale.
+- 🗓️ **Multiple Views** → Switch between **monthly**, **weekly**, and **daily** views.
+- 🎯 **Drag and Drop** → Move events easily between days and time slots.
+- ⚙️ **Optional Drag & Drop** → Enable or disable via input.
+- 🧩 **Standalone Components** → Works without `NgModules`.
+- 🧠 **Simple API** → Use `@Input` and `@Output` for full control.
+- 📅 **Powered by Luxon** → Reliable and precise date handling.
+- ⚡ **Lightweight & Performant** → Built with Angular **Signals**.
+- 🌍 **Internationalization Ready** → Customizable texts and automatic locale detection.
 
 ---
 
 ## 💾 Installation
 
-Since the library uses **Luxon** for date manipulation, install both packages:
-
 ```bash
 npm install chrono-calendar luxon
 ```
 
-> **Tip:** If you need Luxon types, install them as well:
+> 💡 If you need Luxon types, install them too:
 ```bash
 npm install -D @types/luxon
 ```
@@ -42,12 +39,9 @@ npm install -D @types/luxon
 
 ## 🚀 How to Use
 
-Integrating **Chrono Calendar** is simple and done in three steps:
-
-### 1) Import the Component and Luxon
+### 1️⃣ Import the Component and Luxon
 
 ```typescript
-// in your-component.component.ts
 import { Component } from '@angular/core';
 import { ChronoCalendarComponent, CalendarEvent } from 'chrono-calendar';
 import { DateTime } from 'luxon';
@@ -55,7 +49,7 @@ import { DateTime } from 'luxon';
 @Component({
   selector: 'app-your-page',
   standalone: true,
-  imports: [ChronoCalendarComponent], // Add the component here
+  imports: [ChronoCalendarComponent],
   templateUrl: './your-page.component.html',
 })
 export class YourPageComponent {
@@ -63,27 +57,35 @@ export class YourPageComponent {
 }
 ```
 
-### 2) Add to Template and Provide Data
+---
+
+### 2️⃣ Add to Template and Provide Data
 
 ```html
 <div style="height: 90vh;">
   <chrono-calendar
     [events]="myEvents"
     [initialView]="'weekly'"
+    [enableDragDrop]="true"
     [todayButtonText]="'Today'"
     [monthViewText]="'Month'"
     [weekViewText]="'Week'"
     [dayViewText]="'Day'"
     (eventClicked)="handleEventClicked($event)"
+    (eventDropped)="handleEventDropped($event)"
   >
   </chrono-calendar>
 </div>
 ```
 
-### 3) Prepare Event Data (Using Luxon)
+---
+
+### 3️⃣ Prepare Event Data
 
 ```typescript
-// in your-component.component.ts
+import { DateTime } from 'luxon';
+import { CalendarEvent, EventDroppedInfo } from 'chrono-calendar';
+
 export class YourPageComponent {
   myEvents: CalendarEvent[] = [
     {
@@ -91,20 +93,26 @@ export class YourPageComponent {
       title: 'Team Meeting',
       start: DateTime.fromISO('2025-08-25T10:00:00'),
       end: DateTime.fromISO('2025-08-25T11:00:00'),
-      color: '#0d6efd', // Blue
+      color: '#0d6efd',
     },
     {
       id: 2,
       title: 'Client Lunch',
       start: DateTime.fromISO('2025-08-26T12:30:00'),
       end: DateTime.fromISO('2025-08-26T14:00:00'),
-      color: '#198754', // Green
+      color: '#198754',
     },
   ];
 
   handleEventClicked(event: CalendarEvent) {
-    console.log('Event clicked:', event.title, event.start.toISO());
+    console.log('Event clicked:', event.title);
     alert(`Event: ${event.title}`);
+  }
+
+  handleEventDropped(info: EventDroppedInfo) {
+    console.log('Event dropped:', info.event.title);
+    console.log('New date:', info.newDate.toISO());
+    console.log('Previous date:', info.previousDate.toISO());
   }
 }
 ```
@@ -113,37 +121,60 @@ export class YourPageComponent {
 
 ## ⚙️ Properties API
 
-### Inputs (`@Input`)
+### 🔹 Inputs (`@Input`)
 
-| Property            | Type                                 | Default     | Description                                   |
-|---------------------|--------------------------------------|-------------|-----------------------------------------------|
-| `events`            | `CalendarEvent[]`                    | `[]`        | List of events displayed in the calendar.     |
-| `initialView`       | `'monthly' \| 'weekly' \| 'daily'`   | `'monthly'` | Sets the initial view.                        |
-| `todayButtonText`   | `string`                             | `'Today'`   | Text for the "Today" button.                  |
-| `monthViewText`     | `string`                             | `'Month'`   | Text for the **Monthly** view button.         |
-| `weekViewText`      | `string`                             | `'Week'`    | Text for the **Weekly** view button.          |
-| `dayViewText`       | `string`                             | `'Day'`     | Text for the **Daily** view button.           |
-
-### Outputs (`@Output`)
-
-| Event                | Returns                              | Description                                      |
-|----------------------|--------------------------------------|--------------------------------------------------|
-| `eventClicked`       | `CalendarEvent`                      | Fired when an event is clicked.                  |
-| `dayClicked`         | `DateTime`                           | Fired when clicking on a day cell.               |
-| `viewChange`         | `'monthly' \| 'weekly' \| 'daily'`   | Fired when switching the view type.              |
-| `monthChange`        | `{ start: DateTime, end: DateTime }` | Fired when the visible date range changes.       |
+| Property | Type | Default | Description |
+|-----------|------|----------|--------------|
+| `events` | `CalendarEvent[]` | `[]` | List of events displayed in the calendar. |
+| `initialView` | `'monthly' \| 'weekly' \| 'daily'` | `'monthly'` | Sets the initial view mode. |
+| `enableDragDrop` | `boolean` | `true` | Enables or disables drag-and-drop functionality. |
+| `todayButtonText` | `string` | `'Today'` | Label for the “Today” button. |
+| `monthViewText` | `string` | `'Month'` | Label for the Month view button. |
+| `weekViewText` | `string` | `'Week'` | Label for the Week view button. |
+| `dayViewText` | `string` | `'Day'` | Label for the Day view button. |
 
 ---
 
-## 🌍 Internationalization
+### 🔹 Outputs (`@Output`)
 
-The calendar supports multiple languages through customizable button texts.
+| Event | Returns | Description |
+|--------|----------|-------------|
+| `eventClicked` | `CalendarEvent` | Fired when an event is clicked. |
+| `dayClicked` | `DateTime` | Fired when a day cell is clicked. |
+| `eventDropped` | `EventDroppedInfo` | Fired when an event is moved. |
+| `viewChange` | `'monthly' \| 'weekly' \| 'daily'` | Fired when the view mode changes. |
+| `monthChange` | `{ start: DateTime, end: DateTime }` | Fired when the visible range changes. |
 
-**Portuguese Example**
+---
+
+## 🎯 Drag and Drop
+
+Chrono Calendar has **built-in drag-and-drop** support for all views:
+
+- 🗓️ **Monthly:** Move events between days  
+- 📅 **Weekly:** Move events between time slots  
+- 🕒 **Daily:** Reorganize event times  
+
+Enable or disable as needed:
 
 ```html
+<!-- Enable (default) -->
+<chrono-calendar [enableDragDrop]="true"></chrono-calendar>
+
+<!-- Disable -->
+<chrono-calendar [enableDragDrop]="false"></chrono-calendar>
+```
+
+---
+
+## 🌍 Internationalization (i18n)
+
+Customize button labels easily.  
+Date formatting adapts automatically to the user’s browser locale.
+
+**Portuguese Example:**
+```html
 <chrono-calendar
-  [events]="myEvents"
   [todayButtonText]="'Hoje'"
   [monthViewText]="'Mês'"
   [weekViewText]="'Semana'"
@@ -151,11 +182,9 @@ The calendar supports multiple languages through customizable button texts.
 ></chrono-calendar>
 ```
 
-**Spanish Example**
-
+**Spanish Example:**
 ```html
 <chrono-calendar
-  [events]="myEvents"
   [todayButtonText]="'Hoy'"
   [monthViewText]="'Mes'"
   [weekViewText]="'Semana'"
@@ -163,11 +192,9 @@ The calendar supports multiple languages through customizable button texts.
 ></chrono-calendar>
 ```
 
-Date formatting automatically adapts to the user's browser locale, so dates will appear in the appropriate format for each user's location.
-
 ---
 
-## 📅 `CalendarEvent` Interface
+## 📘 Interfaces
 
 ```typescript
 import { DateTime } from 'luxon';
@@ -178,12 +205,12 @@ export interface CalendarEvent {
   start: DateTime;
   end: DateTime;
   color?: string;
-  layout?: {
-    width: number;     // In %
-    left: number;      // In %
-    column: number;
-    totalColumns: number;
-  };
+}
+
+export interface EventDroppedInfo {
+  event: CalendarEvent;
+  newDate: DateTime;
+  previousDate: DateTime;
 }
 ```
 
@@ -191,16 +218,22 @@ export interface CalendarEvent {
 
 ## 🎨 Styling
 
-The calendar comes with default styling, but you can customize it by overriding the CSS classes. All components use semantic class names for easy customization.
+Chrono Calendar includes default styles.  
+You can **customize** it easily by overriding CSS classes using your own theme or stylesheet.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are always welcome!  
+If you’d like to improve Chrono Calendar, open a **Pull Request** or **Issue** on GitHub.
 
 ---
 
 ## 📄 License
 
 This project is licensed under the **MIT License**.
+
+---
+
+Made with ❤️ by the Chrono Calendar team.

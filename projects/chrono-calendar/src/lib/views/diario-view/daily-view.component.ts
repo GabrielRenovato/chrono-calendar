@@ -9,19 +9,31 @@ import {
 import { CommonModule, NgStyle } from '@angular/common';
 import { DateTime } from 'luxon';
 import { CalendarDay, CalendarEvent } from '../../calendar.model';
+import { 
+  CdkDrag, 
+  CdkDropList,
+  CdkDropListGroup,
+  CdkDragDrop
+} from '@angular/cdk/drag-drop';
+
+export interface EventDroppedInfo {
+  event: CalendarEvent;
+  newDate: DateTime;
+  previousDate: DateTime;
+}
 
 @Component({
   selector: 'app-daily-view',
   standalone: true,
-  imports: [CommonModule, NgStyle],
+  imports: [CommonModule, NgStyle, CdkDrag, CdkDropList, CdkDropListGroup],
   templateUrl: './daily-view.component.html',
   styleUrl: './daily-view.component.scss',
 })
 export class DailyViewComponent implements OnChanges {
   @Input() day: CalendarDay | undefined;
+  @Input() enableDragDrop: boolean = true; 
   @Output() eventClicked = new EventEmitter<CalendarEvent>();
-
-  eventLayouts = new Map<string | number, object>();
+  @Output() eventDropped = new EventEmitter<EventDroppedInfo>();
 
   hoursOfDay: string[] = Array.from(
     { length: 24 },
@@ -32,66 +44,78 @@ export class DailyViewComponent implements OnChanges {
   private PIXELS_PER_MINUTE = this.PIXELS_PER_HOUR / 60;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['day'] && this.day) {
-      this.calculateEventLayouts(this.day.events);
-    }
+    
   }
 
-  private calculateEventLayouts(events: CalendarEvent[]): void {
-    this.eventLayouts.clear();
-    if (events.length === 0) {
-      return;
+  getEventsAtHour(hour: number): CalendarEvent[] {
+    if (!this.day) return [];
+    return this.day.events.filter(event => event.start.hour === hour);
+  }
+
+  getEventStyle(event: CalendarEvent, hour: number, eventIndex: number): any {
+    const eventsAtHour = this.getEventsAtHour(hour);
+    const totalEvents = eventsAtHour.length;
+    
+    const durationMinutes = event.end.diff(event.start, 'minutes').minutes;
+    const height = Math.max(20, durationMinutes * this.PIXELS_PER_MINUTE);
+    
+    let width = 100;
+    let left = 0;
+    
+    if (totalEvents > 1) {
+      width = 100 / totalEvents;
+      left = eventIndex * width;
+    }
+    
+    const styles: any = {
+      position: 'absolute',
+      top: '2px',
+      height: `${height}px`,
+      left: `${left}%`,
+      width: `${width}%`,
+      zIndex: 10 + eventIndex,
+    };
+    
+    if (eventIndex > 0) {
+      styles['borderLeft'] = '2px solid white';
+    }
+    
+    return styles;
+  }
+
+  onSlotDrop(dropEvent: CdkDragDrop<CalendarEvent[]>, targetHour: number): void {
+    if (!this.enableDragDrop || !this.day) return; 
+
+    const droppedEvent = dropEvent.item.data as CalendarEvent;
+    const previousDate = droppedEvent.start;
+
+    const index = this.day.events.findIndex(e => e.id === droppedEvent.id);
+    if (index !== -1) {
+      this.day.events.splice(index, 1);
     }
 
-    const sortedEvents = [...events].sort(
-      (a, b) => a.start.toMillis() - b.start.toMillis()
-    );
+    const duration = droppedEvent.end.diff(droppedEvent.start);
+    const newStart = this.day.date.set({
+      hour: targetHour,
+      minute: 0,
+      second: 0,
+      millisecond: 0
+    });
+    const newEnd = newStart.plus(duration);
 
-    const columns: CalendarEvent[][] = [];
-    for (const event of sortedEvents) {
-      let columnFound = false;
-      for (const column of columns) {
-        const lastEventInColumn = column[column.length - 1];
-        if (lastEventInColumn.end <= event.start) {
-          column.push(event);
-          columnFound = true;
-          break;
-        }
-      }
-      if (!columnFound) {
-        columns.push([event]);
-      }
-    }
+    droppedEvent.start = newStart;
+    droppedEvent.end = newEnd;
 
-    const totalColumns = columns.length;
-    for (let i = 0; i < totalColumns; i++) {
-      for (const event of columns[i]) {
-        const minutesSinceMidnight = event.start.hour * 60 + event.start.minute;
-        const durationInMinutes = event.end.diff(
-          event.start,
-          'minutes'
-        ).minutes;
+    this.day.events.push(droppedEvent);
 
-        const width = 100 / totalColumns;
-        const left = i * width;
+    this.eventDropped.emit({
+      event: droppedEvent,
+      newDate: newStart,
+      previousDate: previousDate
+    });
+  }
 
-        const styles: any = {
-          top: `${minutesSinceMidnight * this.PIXELS_PER_MINUTE}px`,
-          height: `${Math.max(
-            20,
-            durationInMinutes * this.PIXELS_PER_MINUTE
-          )}px`,
-          left: `${left}%`,
-          width: `${width}%`,
-          zIndex: i + 10,
-        };
-
-        if (i > 0) {
-          styles['borderLeft'] = '2px solid white';
-        }
-
-        this.eventLayouts.set(event.id, styles);
-      }
-    }
+  getSlotId(hour: number): string {
+    return `day-slot-${hour}`;
   }
 }

@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChronoCalendarComponent } from 'projects/chrono-calendar/src/lib/chrono-calendar/chrono-calendar.component';
-import { CalendarEvent } from 'projects/chrono-calendar/src/lib/calendar.model';
+import { CalendarEvent } from 'chrono-calendar';
 import { DateTime } from 'luxon';
+import { ChronoCalendarComponent } from 'projects/chrono-calendar/src/public-api';
 
 @Component({
   selector: 'app-basic-usage',
@@ -52,7 +52,6 @@ export class BasicUsageComponent implements OnInit {
 
       if (i > 1 && i % 3 === 0) {
         const previousEvent = events[events.length - 1];
-
         start = previousEvent.start.plus({ minutes: 30 });
         end = start.plus({ minutes: randomDuration });
       } else {
@@ -82,6 +81,11 @@ export class BasicUsageComponent implements OnInit {
     return events;
   }
 
+  handleEventDropped(dropInfo: { event: CalendarEvent; newDate: DateTime; previousDate: DateTime }) {
+    console.log(`Event "${dropInfo.event.title}" moved from ${dropInfo.previousDate.toLocaleString()} to ${dropInfo.newDate.toLocaleString()}`);
+  
+  }
+
   handleEventClicked(event: CalendarEvent) {
     console.log('Event clicked in application:', event);
     alert(`Event: ${event.title}`);
@@ -101,11 +105,13 @@ export class YourComponent { ... }`;
 <chrono-calendar
   [events]="myEvents"
   [initialView]="'monthly'"
-  [todayButtonText]="'Daily'"
-  [monthViewText]="'Monthly'"
-  [weekViewText]="'Weekly'"
-  [dayViewText]="'Dia'"
-  (eventClicked)="handleEventClicked($event)">
+  [enableDragDrop]="true"
+  [todayButtonText]="'Today'"
+  [monthViewText]="'Month'"
+  [weekViewText]="'Week'"
+  [dayViewText]="'Day'"
+  (eventClicked)="handleEventClicked($event)"
+  (eventDropped)="handleEventDropped($event)">
 </chrono-calendar>`;
 
   codeSnippetTs = `
@@ -123,12 +129,18 @@ export class YourComponent implements OnInit {
   }
 
   private generateRandomEvents(quantity: number): CalendarEvent[] {
-    
+    // Generate your events here
     return [];
   }
 
   handleEventClicked(event: CalendarEvent) {
     alert(\`Event: \${event.title}\`);
+  }
+
+  handleEventDropped(dropInfo: { event: CalendarEvent; newDate: DateTime; previousDate: DateTime }) {
+    console.log(\`Event "\${dropInfo.event.title}" moved\`);
+    // Update your backend here
+    // this.calendarService.updateEvent(dropInfo.event).subscribe();
   }
 }`;
 }

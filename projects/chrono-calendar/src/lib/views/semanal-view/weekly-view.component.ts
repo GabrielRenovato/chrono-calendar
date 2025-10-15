@@ -9,115 +9,117 @@ import {
 import { CommonModule, NgStyle } from '@angular/common';
 import { CalendarDay, CalendarEvent } from '../../calendar.model';
 import { DateTime, Info } from 'luxon';
+import { 
+  CdkDrag, 
+  CdkDropList,
+  CdkDropListGroup,
+  CdkDragDrop
+} from '@angular/cdk/drag-drop';
+
+export interface EventDroppedInfo {
+  event: CalendarEvent;
+  newDate: DateTime;
+  previousDate: DateTime;
+}
 
 @Component({
   selector: 'app-weekly-view',
   standalone: true,
-  imports: [CommonModule, NgStyle],
+  imports: [CommonModule, NgStyle, CdkDrag, CdkDropList, CdkDropListGroup],
   templateUrl: './weekly-view.component.html',
   styleUrl: './weekly-view.component.scss',
 })
 export class WeeklyViewComponent implements OnChanges {
   @Input() days: CalendarDay[] = [];
+  @Input() enableDragDrop: boolean = true; 
   @Output() dayClicked = new EventEmitter<DateTime>();
   @Output() eventClicked = new EventEmitter<CalendarEvent>();
+  @Output() eventDropped = new EventEmitter<EventDroppedInfo>();
 
-  eventLayouts = new Map<string | number, object>();
   private maxZIndex = 10;
+  
   weekdays: string[] = Info.weekdays('short', {
     locale: Intl.DateTimeFormat().resolvedOptions().locale,
   }).map((day) => day.charAt(0).toUpperCase() + day.slice(1, 3));
+  
   hoursOfDay: string[] = Array.from(
     { length: 24 },
     (_, i) => `${i.toString().padStart(2, '0')}:00`
   );
 
-  private PIXELS_PER_HOUR = 80;
-  private PIXELS_PER_MINUTE = this.PIXELS_PER_HOUR / 60;
+  private readonly PIXELS_PER_HOUR = 80;
+  private readonly PIXELS_PER_MINUTE = this.PIXELS_PER_HOUR / 60;
+  private readonly CASCADE_OFFSET_PERCENT = 12;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['days'] && this.days.length > 0) {
-      this.calculateLayoutsForWeek();
-    }
+    
   }
 
-  private calculateLayoutsForWeek(): void {
-    this.eventLayouts.clear();
+  getEventsAtHour(day: CalendarDay, hour: number): CalendarEvent[] {
+    return day.events.filter(event => event.start.hour === hour);
+  }
 
-    for (const day of this.days) {
-      if (day.events.length === 0) {
-        continue;
-      }
+  getEventHeight(event: CalendarEvent): number {
+    const durationMinutes = event.end.diff(event.start, 'minutes').minutes;
+    return Math.max(20, durationMinutes * this.PIXELS_PER_MINUTE);
+  }
 
-      const sortedEvents = [...day.events].sort(
-        (a, b) => a.start.toMillis() - b.start.toMillis()
-      );
+  getEventWidth(day: CalendarDay, hour: number, eventIndex: number): string {
+    const eventsAtHour = this.getEventsAtHour(day, hour);
+    const totalEvents = eventsAtHour.length;
+    
+    if (totalEvents === 1) return '100%';
+    
+    const width = 100 - (totalEvents - 1) * this.CASCADE_OFFSET_PERCENT;
+    return `${width}%`;
+  }
 
-      const columns: CalendarEvent[][] = [];
-
-      for (const event of sortedEvents) {
-        let columnFound = false;
-
-        for (const column of columns) {
-          const lastEventInColumn = column[column.length - 1];
-          if (lastEventInColumn.end <= event.start) {
-            column.push(event);
-            columnFound = true;
-            break;
-          }
-        }
-
-        if (!columnFound) {
-          columns.push([event]);
-        }
-      }
-
-      const totalColumns = columns.length;
-      for (let i = 0; i < totalColumns; i++) {
-        for (const event of columns[i]) {
-          const minutesSinceMidnight =
-            event.start.hour * 60 + event.start.minute;
-          const durationInMinutes = event.end.diff(
-            event.start,
-            'minutes'
-          ).minutes;
-
-          const CASCADE_OFFSET_PERCENT = 12;
-
-          const width = 100 - (totalColumns - 1) * CASCADE_OFFSET_PERCENT;
-          const left = i * CASCADE_OFFSET_PERCENT;
-          const zIndex = i + 10;
-
-          const styles: any = {
-            top: `${minutesSinceMidnight * this.PIXELS_PER_MINUTE}px`,
-            height: `${Math.max(
-              20,
-              durationInMinutes * this.PIXELS_PER_MINUTE
-            )}px`,
-            left: `${left}%`,
-            width: `${width}%`,
-            zIndex: zIndex,
-          };
-
-          if (i > 0) {
-            styles['border'] = '1px solid white';
-          }
-
-          this.eventLayouts.set(event.id, styles);
-        }
-      }
-    }
+  getEventLeft(day: CalendarDay, hour: number, eventIndex: number): string {
+    const left = eventIndex * this.CASCADE_OFFSET_PERCENT;
+    return `${left}%`;
   }
 
   bringEventToFront(event: CalendarEvent): void {
-    const currentStyle = this.eventLayouts.get(event.id) as any;
-    if (!currentStyle) return;
-
     this.maxZIndex++;
-    const newStyle = { ...currentStyle, zIndex: this.maxZIndex };
-
-    this.eventLayouts.set(event.id, newStyle);
-
     this.eventClicked.emit(event);
+  }
+
+  onSlotDrop(dropEvent: CdkDragDrop<CalendarEvent[]>, targetDay: CalendarDay, targetHour: number): void {
+    if (!this.enableDragDrop) return; 
+
+    const droppedEvent = dropEvent.item.data as CalendarEvent;
+    const previousDate = droppedEvent.start;
+
+    for (const day of this.days) {
+      const index = day.events.findIndex(e => e.id === droppedEvent.id);
+      if (index !== -1) {
+        day.events.splice(index, 1);
+        break;
+      }
+    }
+
+    const duration = droppedEvent.end.diff(droppedEvent.start);
+    const newStart = targetDay.date.set({
+      hour: targetHour,
+      minute: 0,
+      second: 0,
+      millisecond: 0
+    });
+    const newEnd = newStart.plus(duration);
+
+    droppedEvent.start = newStart;
+    droppedEvent.end = newEnd;
+
+    targetDay.events.push(droppedEvent);
+
+    this.eventDropped.emit({
+      event: droppedEvent,
+      newDate: newStart,
+      previousDate: previousDate
+    });
+  }
+
+  getSlotId(day: CalendarDay, hour: number): string {
+    return `slot-${day.date.toISODate()}-${hour}`;
   }
 }
